@@ -154,5 +154,9 @@ public class RootPane extends GridPane {
                 }
             }
         });
+
+        File file = new File("C:\\Users\\f-luc\\Desktop\\JavaProjects\\JavaFX\\iotSave");
+        if (!file.isFile()) return;
+        questionnaire.loadFromFile(file, false);
     }
 }

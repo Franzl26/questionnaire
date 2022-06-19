@@ -59,11 +59,16 @@ public class Questionnaire implements Iterable<Question> {
         for (Question q : questions) {
             builder.append(q).append("\n");
         }
-        builder.append("\n}");
+        builder.append("}");
         return builder.toString();
     }
 
     public void showNext(boolean solve) {
+        if (size() == 0) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "No questions available");
+            alert.showAndWait();
+            return;
+        }
         current++;
         if (current >= questions.size()) current = 0;
         answerField.clear();
@@ -72,6 +77,11 @@ public class Questionnaire implements Iterable<Question> {
     }
 
     public void showPrevious(boolean solve) {
+        if (size() == 0) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "No questions available");
+            alert.showAndWait();
+            return;
+        }
         current--;
         if (current < 0) current = questions.size() - 1;
         answerField.clear();
@@ -80,6 +90,11 @@ public class Questionnaire implements Iterable<Question> {
     }
 
     public void solveQuestion() {
+        if (size() == 0) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "No questions available");
+            alert.showAndWait();
+            return;
+        }
         answerField.setText(questions.get(current).getAnswer());
     }
 
@@ -121,6 +136,7 @@ public class Questionnaire implements Iterable<Question> {
             alert.showAndWait();
         }
         showNext(solve);
+        System.out.println(this);
     }
 
     public void convertFile(File file, boolean solve) {
@@ -135,12 +151,17 @@ public class Questionnaire implements Iterable<Question> {
                 }
                 question = line;
                 line = in.readLine();
+                if (line == null) {
+                    questions.add(new Question(question, ""));
+                    return;
+                }
                 StringBuilder build = new StringBuilder();
                 while (line.length() > 2) {
                     build.append(line).append("\n");
                     line = in.readLine();
                     if (line == null) {
                         questions.add(new Question(question, build.toString()));
+                        showNext(solve);
                         return;
                     }
                 }
