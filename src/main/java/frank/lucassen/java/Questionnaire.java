@@ -37,10 +37,6 @@ public class Questionnaire implements Iterable<Question> {
         this.answerField = answerField;
     }
 
-    public void insertQuestion(Question question) {
-        questions.add(question);
-    }
-
     public int size() {
         return questions.size();
     }
