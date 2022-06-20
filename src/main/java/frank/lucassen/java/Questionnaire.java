@@ -5,8 +5,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 public class Questionnaire implements Iterable<Question> {
     private final ArrayList<Question> questions = new ArrayList<>();
@@ -14,6 +13,9 @@ public class Questionnaire implements Iterable<Question> {
     private TextArea answerField;
 
     private int current = -1;
+
+    private ArrayList<Integer> randomInts = null;
+    private int randomCurrent = 0;
 
     public Questionnaire() {
 
@@ -99,9 +101,23 @@ public class Questionnaire implements Iterable<Question> {
     }
 
     public void showRandomQuestion(boolean solve) {
-        current = (int) (Math.random() * size());
-        //current--;
-        showNext(solve);
+        int size = questions.size();
+        if (randomInts == null || size != randomInts.size()) {
+            randomInts = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                randomInts.add(i);
+            }
+            Collections.shuffle(randomInts);
+            randomCurrent = 0;
+            System.out.println(randomInts);
+        }
+        current = randomInts.get(randomCurrent);
+        Question tmp = questions.get(current);
+        questionField.setText(tmp.getQuestion());
+        if (solve) answerField.setText(tmp.getAnswer());
+
+        randomCurrent++;
+        if (randomCurrent == randomInts.size()) randomInts = null;
     }
 
     public void addQuestion() {
@@ -136,7 +152,6 @@ public class Questionnaire implements Iterable<Question> {
             alert.showAndWait();
         }
         showNext(solve);
-        System.out.println(this);
     }
 
     public void convertFile(File file, boolean solve) {
