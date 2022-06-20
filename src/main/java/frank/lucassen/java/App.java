@@ -18,7 +18,7 @@ public class App extends Application {
         RootPane root = new RootPane();
         Scene scene = new Scene(root, 1300, 400);
 
-        stage.setTitle("Network Panel");
+        stage.setTitle("Questionnaire");
         stage.setScene(scene);
         stage.show();
     }

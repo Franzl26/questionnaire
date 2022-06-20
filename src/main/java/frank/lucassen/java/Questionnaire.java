@@ -35,10 +35,6 @@ public class Questionnaire implements Iterable<Question> {
         this.answerField = answerField;
     }
 
-    public void insertQuestion(Question question) {
-        questions.add(question);
-    }
-
     public int size() {
         return questions.size();
     }
@@ -136,7 +132,6 @@ public class Questionnaire implements Iterable<Question> {
             alert.showAndWait();
         }
         showNext(solve);
-        System.out.println(this);
     }
 
     public void convertFile(File file, boolean solve) {
