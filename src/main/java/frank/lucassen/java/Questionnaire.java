@@ -111,6 +111,7 @@ public class Questionnaire implements Iterable<Question> {
         Question tmp = questions.get(current);
         questionField.setText(tmp.getQuestion());
         if (solve) answerField.setText(tmp.getAnswer());
+        else answerField.clear();
 
         randomCurrent++;
         if (randomCurrent == randomInts.size()) randomInts = null;
