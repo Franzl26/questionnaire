@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.*;
 
 public class Questionnaire implements Iterable<Question> {
-    private final ArrayList<Question> questions = new ArrayList<>();
+    private ArrayList<Question> questions = new ArrayList<>();
     private TextField questionField;
     private TextArea answerField;
 
@@ -117,14 +117,10 @@ public class Questionnaire implements Iterable<Question> {
         if (randomCurrent == randomInts.size()) randomInts = null;
     }
 
-    public void addQuestion() {
-        questions.add(new Question(questionField.getText(), answerField.getText()));
-    }
-
-    public void saveToFile(File file) {
+    public static void saveToFile(File file, ArrayList<Question> questions) {
         System.out.println(file.getPath());
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file.getPath()))) {
-            for (Question q : this) {
+            for (Question q : questions) {
                 out.writeObject(q);
             }
             out.flush();
@@ -134,8 +130,12 @@ public class Questionnaire implements Iterable<Question> {
         }
     }
 
+    public void loadFromFile(File file) {
+        loadFromFile(file, questions);
+    }
+
     @SuppressWarnings("InfiniteLoopStatement")
-    public void loadFromFile(File file, boolean solve) {
+    public static void loadFromFile(File file, ArrayList<Question> questions) {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file))) {
             try {
                 while (true) {
@@ -148,16 +148,19 @@ public class Questionnaire implements Iterable<Question> {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error while trying to load questions from file");
             alert.showAndWait();
         }
-        showNext(solve);
     }
 
-    public void convertFile(File file, boolean solve) {
+    public static void convertFile(File file, ArrayList<Question> questions) {
         try (BufferedReader in = new BufferedReader(new FileReader(file))) {
             String line = in.readLine();
             String question;
             String answer;
             while (line != null) {
                 if (line.length() < 2) {
+                    line = in.readLine();
+                    continue;
+                }
+                if (line.startsWith("##")) {
                     line = in.readLine();
                     continue;
                 }
@@ -173,7 +176,6 @@ public class Questionnaire implements Iterable<Question> {
                     line = in.readLine();
                     if (line == null) {
                         questions.add(new Question(question, build.toString()));
-                        showNext(solve);
                         return;
                     }
                 }
@@ -187,6 +189,21 @@ public class Questionnaire implements Iterable<Question> {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Error while trying to convert file");
             alert.showAndWait();
         }
-        showNext(solve);
+    }
+
+    public ArrayList<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(ArrayList<Question> questions) {
+        this.questions = questions;
+    }
+
+    public void resetCurrent() {
+        current = -1;
+    }
+
+    public void setCurrent(int current) {
+        this.current = current;
     }
 }

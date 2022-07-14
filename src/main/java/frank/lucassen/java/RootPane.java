@@ -2,27 +2,69 @@ package frank.lucassen.java;
 
 import javafx.event.ActionEvent;
 import javafx.geometry.*;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.File;
+import java.io.*;
 
 public class RootPane extends GridPane {
-    static boolean solve = false;
+    static boolean solve = true;
 
     public RootPane() {
         Questionnaire questionnaire = new Questionnaire();
         Alert noElementsAvailable = new Alert(Alert.AlertType.ERROR, "No elements available");
 
         // Buttons
+        Button defaultPathButton = new Button("Set default File Path");
+        defaultPathButton.addEventHandler(ActionEvent.ACTION, e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Select default File");
+            File file = fileChooser.showOpenDialog(new Stage());
+            if (file == null) return;
+            try (BufferedWriter out = new BufferedWriter(new FileWriter(".\\defaultSavePath"))) {
+                out.write(file.getPath());
+            } catch (IOException ex) {
+                System.out.println("Couldn't write default Path");
+            }
+        });
+
+        Button openButton = new Button("Open");
+        openButton.addEventHandler(ActionEvent.ACTION, e -> {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open file");
+            File file = fileChooser.showOpenDialog(new Stage());
+            if (file != null) questionnaire.loadFromFile(file);
+        });
+
         ToggleButton showSolutionButton = new ToggleButton("show Solution (Y/N)");
         Button nextButton = new Button("_Next");
         nextButton.addEventHandler(ActionEvent.ACTION, e -> {
             if (questionnaire.size() < 1) noElementsAvailable.showAndWait();
             else questionnaire.showNext(showSolutionButton.isSelected());
+        });
+
+        Button selectQuestionButton = new Button("Select Question");
+        selectQuestionButton.addEventHandler(ActionEvent.ACTION, e -> {
+            SelectQuestionPane root = new SelectQuestionPane(questionnaire);
+            Scene scene = new Scene(root, SelectQuestionPane.WIDTH, SelectQuestionPane.HEIGHT);
+
+            Stage stage = new Stage();
+
+            stage.setTitle("Question Select");
+            stage.setScene(scene);
+            stage.showAndWait();
+            questionnaire.showNext(showSolutionButton.isSelected());
+        });
+
+        Button editQuestionsButton = new Button("Edit Questions");
+        editQuestionsButton.addEventHandler(ActionEvent.ACTION, e -> {
+            startQuestionPane(questionnaire);
+            questionnaire.resetCurrent();
+            questionnaire.showNext(showSolutionButton.isSelected());
         });
 
         Button previousButton = new Button("_Previous");
@@ -37,35 +79,26 @@ public class RootPane extends GridPane {
             else questionnaire.solveQuestion();
         });
 
-        Button addButton = new Button("Add");
-        addButton.addEventHandler(ActionEvent.ACTION, e -> questionnaire.addQuestion());
-
-        Button openButton = new Button("Open");
-        openButton.addEventHandler(ActionEvent.ACTION, e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Open file");
-            File file = fileChooser.showOpenDialog(new Stage());
-            if (file != null) questionnaire.loadFromFile(file, showSolutionButton.isSelected());
-        });
-
-        Button saveButton = new Button("Save");
-        saveButton.addEventHandler(ActionEvent.ACTION, e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save file");
-            File file = fileChooser.showSaveDialog(new Stage());
-            if (file != null) questionnaire.saveToFile(file);
-        });
-
-        Button convertButton = new Button("Convert");
-        convertButton.addEventHandler(ActionEvent.ACTION, e -> {
-            FileChooser fileChooser = new FileChooser();
-            fileChooser.setTitle("Save file");
-            File file = fileChooser.showOpenDialog(new Stage());
-            if (file != null) questionnaire.convertFile(file, showSolutionButton.isSelected());
-        });
-
         Button clearQuestionsButton = new Button("_Clear Questions");
         clearQuestionsButton.addEventHandler(ActionEvent.ACTION, e -> questionnaire.clearQuestions());
+
+        Button forwardButton = new Button("_Forward");
+        forwardButton.addEventHandler(ActionEvent.ACTION, e -> {
+            if (showSolutionButton.isSelected()) {
+                questionnaire.showNext(true);
+            } else {
+                if (solve) {
+                    solve = false;
+                    questionnaire.solveQuestion();
+                } else {
+                    solve = true;
+                    questionnaire.showNext(false);
+                }
+            }
+        });
+
+        Button randomQuestionButton = new Button("_random Question");
+        randomQuestionButton.addEventHandler(ActionEvent.ACTION, e -> questionnaire.showRandomQuestion(showSolutionButton.isSelected()));
 
 
         // Label
@@ -80,18 +113,16 @@ public class RootPane extends GridPane {
         answerText.setPrefHeight(230);
 
         // put together
-        // Buttons button left
+        // Buttons bottom left
         GridPane bottomLeftPane = new GridPane();
-        bottomLeftPane.add(addButton, 1, 1);
-        bottomLeftPane.add(openButton, 1, 2);
-        bottomLeftPane.add(saveButton, 1, 3);
-        bottomLeftPane.add(convertButton, 1, 4);
-        bottomLeftPane.add(clearQuestionsButton, 1, 5);
-        GridPane.setHalignment(addButton, HPos.CENTER);
+        bottomLeftPane.add(openButton, 1, 1);
+        bottomLeftPane.add(selectQuestionButton, 1, 2);
+        bottomLeftPane.add(editQuestionsButton, 1, 3);
+        bottomLeftPane.add(defaultPathButton, 1, 4);
         GridPane.setHalignment(openButton, HPos.CENTER);
-        GridPane.setHalignment(saveButton, HPos.CENTER);
-        GridPane.setHalignment(convertButton, HPos.CENTER);
-        GridPane.setHalignment(clearQuestionsButton, HPos.CENTER);
+        GridPane.setHalignment(selectQuestionButton, HPos.CENTER);
+        GridPane.setHalignment(editQuestionsButton, HPos.CENTER);
+        GridPane.setHalignment(defaultPathButton, HPos.CENTER);
 
         // labels
         GridPane.setHalignment(questionLabel, HPos.RIGHT);
@@ -100,13 +131,17 @@ public class RootPane extends GridPane {
 
         // Buttons bottom right
         GridPane bottomRightPanel = new GridPane();
-        bottomRightPanel.add(showSolutionButton, 2, 1);
-        bottomRightPanel.add(solveButton, 2, 2);
-        bottomRightPanel.add(previousButton, 1, 3);
-        bottomRightPanel.add(nextButton, 2, 3);
+        bottomRightPanel.add(showSolutionButton, 3, 1);
+        bottomRightPanel.add(solveButton, 3, 2);
+        bottomRightPanel.add(previousButton, 2, 3);
+        bottomRightPanel.add(nextButton, 3, 3);
+        bottomRightPanel.add(forwardButton, 1, 2);
+        bottomRightPanel.add(randomQuestionButton, 1, 1);
         GridPane.setHalignment(solveButton, HPos.CENTER);
         GridPane.setHalignment(previousButton, HPos.CENTER);
         GridPane.setHalignment(nextButton, HPos.CENTER);
+        GridPane.setHalignment(forwardButton, HPos.CENTER);
+        GridPane.setHalignment(randomQuestionButton, HPos.CENTER);
         bottomRightPanel.setAlignment(Pos.BOTTOM_RIGHT);
 
 
@@ -120,9 +155,6 @@ public class RootPane extends GridPane {
         addEventHandler(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() != null) {
                 switch (e.getCode()) {
-                    case C:
-                        questionnaire.clearQuestions();
-                        break;
                     case N:
                         if (questionnaire.size() < 1) noElementsAvailable.showAndWait();
                         else questionnaire.showNext(showSolutionButton.isSelected());
@@ -155,8 +187,26 @@ public class RootPane extends GridPane {
             }
         });
 
-        File file = new File("C:\\Users\\f-luc\\Desktop\\JavaProjects\\JavaFX\\iotSave");
-        if (!file.isFile()) return;
-        questionnaire.loadFromFile(file, false);
+        try (BufferedReader in = new BufferedReader(new FileReader(".\\defaultSavePath"))) {
+            String path = in.readLine();
+            File file = new File(path);
+            if (file.isFile()) {
+                questionnaire.loadFromFile(file);
+                questionnaire.showNext(showSolutionButton.isSelected());
+            }
+        } catch (IOException ex) {
+            System.out.println("Couldn't read default File");
+        }
+    }
+
+    private void startQuestionPane(Questionnaire questionnaire) {
+        EditQuestionPane root = new EditQuestionPane(questionnaire);
+        Scene scene = new Scene(root, EditQuestionPane.WIDTH, EditQuestionPane.HEIGHT);
+
+        Stage stage = new Stage();
+
+        stage.setTitle("Question Edit");
+        stage.setScene(scene);
+        stage.showAndWait();
     }
 }
