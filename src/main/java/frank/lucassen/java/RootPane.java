@@ -79,9 +79,6 @@ public class RootPane extends GridPane {
             else questionnaire.solveQuestion();
         });
 
-        Button clearQuestionsButton = new Button("_Clear Questions");
-        clearQuestionsButton.addEventHandler(ActionEvent.ACTION, e -> questionnaire.clearQuestions());
-
         Button forwardButton = new Button("_Forward");
         forwardButton.addEventHandler(ActionEvent.ACTION, e -> {
             if (showSolutionButton.isSelected()) {
@@ -108,9 +105,9 @@ public class RootPane extends GridPane {
         // Texts
         TextField questionText = new TextField();
         TextArea answerText = new TextArea();
-        questionText.setPrefWidth(1150);
-        answerText.setPrefWidth(1150);
-        answerText.setPrefHeight(230);
+        questionText.setPrefWidth(0.9 * App.APP_WIDTH);
+        answerText.setPrefWidth(0.9 * App.APP_WIDTH);
+        answerText.setPrefHeight(0.6 * App.APP_HEIGHT);
 
         // put together
         // Buttons bottom left
@@ -145,8 +142,8 @@ public class RootPane extends GridPane {
         bottomRightPanel.setAlignment(Pos.BOTTOM_RIGHT);
 
 
-        this.addColumn(1, questionLabel, answerLabel, bottomLeftPane);
-        this.addColumn(2, questionText, answerText, bottomRightPanel);
+        addColumn(1, questionLabel, answerLabel, bottomLeftPane);
+        addColumn(2, questionText, answerText, bottomRightPanel);
 
         // Add Fields to Questionnaire
         questionnaire.setQuestionField(questionText);

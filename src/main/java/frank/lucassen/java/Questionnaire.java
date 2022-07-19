@@ -21,14 +21,6 @@ public class Questionnaire implements Iterable<Question> {
 
     }
 
-    public void clearQuestions() {
-        questions.clear();
-        current = -1;
-        questionField.clear();
-        answerField.clear();
-
-    }
-
     public void setQuestionField(TextField questionField) {
         this.questionField = questionField;
     }
@@ -63,6 +55,8 @@ public class Questionnaire implements Iterable<Question> {
 
     public void showNext(boolean solve) {
         if (size() == 0) {
+            questionField.clear();
+            answerField.clear();
             Alert alert = new Alert(Alert.AlertType.ERROR, "No questions available");
             alert.showAndWait();
             return;
@@ -76,6 +70,8 @@ public class Questionnaire implements Iterable<Question> {
 
     public void showPrevious(boolean solve) {
         if (size() == 0) {
+            questionField.clear();
+            answerField.clear();
             Alert alert = new Alert(Alert.AlertType.ERROR, "No questions available");
             alert.showAndWait();
             return;
@@ -89,6 +85,8 @@ public class Questionnaire implements Iterable<Question> {
 
     public void solveQuestion() {
         if (size() == 0) {
+            questionField.clear();
+            answerField.clear();
             Alert alert = new Alert(Alert.AlertType.ERROR, "No questions available");
             alert.showAndWait();
             return;
