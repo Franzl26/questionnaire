@@ -67,6 +67,17 @@ public class RootPane extends GridPane {
             questionnaire.showNext(showSolutionButton.isSelected());
         });
 
+        Button helpButton = new Button("Help/Readme");
+        helpButton.addEventHandler(ActionEvent.ACTION, e -> {
+            File file = new File(".\\readme.txt");
+            System.out.println(file);
+            try {
+                Runtime.getRuntime().exec(new String[]{"notepad.exe", "\"" + file.getAbsolutePath() + "\""});
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
+
         Button previousButton = new Button("_Previous");
         previousButton.addEventHandler(ActionEvent.ACTION, e -> {
             if (questionnaire.size() < 1) noElementsAvailable.showAndWait();
@@ -116,10 +127,12 @@ public class RootPane extends GridPane {
         bottomLeftPane.add(selectQuestionButton, 1, 2);
         bottomLeftPane.add(editQuestionsButton, 1, 3);
         bottomLeftPane.add(defaultPathButton, 1, 4);
+        bottomLeftPane.add(helpButton,1,5);
         GridPane.setHalignment(openButton, HPos.CENTER);
         GridPane.setHalignment(selectQuestionButton, HPos.CENTER);
         GridPane.setHalignment(editQuestionsButton, HPos.CENTER);
         GridPane.setHalignment(defaultPathButton, HPos.CENTER);
+        GridPane.setHalignment(helpButton, HPos.CENTER);
 
         // labels
         GridPane.setHalignment(questionLabel, HPos.RIGHT);
